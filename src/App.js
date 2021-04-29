@@ -1,23 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import EmpTable from "./components/EmpTable";
+import Container from "@material-ui/core/Container";
+import getUsers from "./utils/api";
+import SearchBar from "./components/SearchBar";
 
 function App() {
+  const [first, setFirst] = useState(true);
+  const [emps, setEmps] = useState([]);
+  const [search, setSearch] = useState();
+  const [filteredEmps, filterEmps] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const employees = await getUsers();
+      setEmps(employees);
+      filterEmps(employees);
+    }
+    console.log(first);
+    if (first) {
+      setFirst(false);
+      fetchData();
+    } else {
+      filterEmps(
+        emps.filter((emp) => emp.name.first.toLowerCase().includes(search))
+      );
+    }
+  }, [search]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Container>
+        <SearchBar search={search} setSearch={setSearch} />
+        <EmpTable emps={filteredEmps} />
+      </Container>
     </div>
   );
 }
